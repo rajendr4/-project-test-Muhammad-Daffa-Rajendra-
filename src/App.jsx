@@ -4,6 +4,10 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-r
 
 const BASE_URL = 'https://suitmedia-backend.suitdev.com';
 
+const API_BASE = import.meta.env.PROD
+  ? 'https://suitmedia-backend.suitdev.com/api'
+  : '/api';
+
 const FALLBACK_IMAGE = `data:image/svg+xml;base64,${btoa(`
   <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
     <rect width="400" height="300" fill="#ccc"/>
@@ -43,41 +47,42 @@ const App = () => {
   }, []);
 
   const fetchPosts = useCallback(async (page, size, sort) => {
-    setLoading(true);
-    try {
-      const query = new URLSearchParams({
-        'page[number]': page,
-        'page[size]': size,
-        'sort': sort,
-      });
-      query.append('append[]', 'small_image');
-      query.append('append[]', 'medium_image');
+  setLoading(true);
+  try {
+    const query = new URLSearchParams({
+      'page[number]': page,
+      'page[size]': size,
+      'sort': sort,
+    });
+    query.append('append[]', 'small_image');
+    query.append('append[]', 'medium_image');
 
-      const response = await fetch(`/api/ideas?${query.toString()}`, {
-        method: 'GET',
-        headers: { 
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-      });
+    const response = await fetch(`${API_BASE}/ideas?${query.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('API Response:', data); 
-      setPosts(data.data || []);
-      setTotalItems(data.meta?.total || 0);
-      updateURL(page, size, sort);
-    } catch (err) {
-      console.error('Error fetching posts:', err);
-      setPosts([]);
-      setTotalItems(0);
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  }, [updateURL]);
+
+    const data = await response.json();
+    console.log('API Response:', data);
+    setPosts(data.data || []);
+    setTotalItems(data.meta?.total || 0);
+    updateURL(page, size, sort);
+  } catch (err) {
+    console.error('Error fetching posts:', err);
+    setPosts([]);
+    setTotalItems(0);
+  } finally {
+    setLoading(false);
+  }
+}, [updateURL]);
+
 
   useEffect(() => {
     fetchPosts(currentPage, itemsPerPage, sortBy);
