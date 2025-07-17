@@ -27,7 +27,7 @@ export default defineConfig({
         }
       },
       
-      // Improved image proxy configuration
+      
       '/proxy-image': {
         target: 'https://assets.suitdev.com',
         changeOrigin: true,
@@ -42,14 +42,14 @@ export default defineConfig({
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log('Image proxy request:', req.method, req.url);
             
-            // Clean potentially problematic headers
+          
             proxyReq.removeHeader('referer');
             proxyReq.removeHeader('origin');
             proxyReq.removeHeader('x-forwarded-for');
             proxyReq.removeHeader('x-forwarded-proto');
             proxyReq.removeHeader('x-forwarded-host');
             
-            // Set headers that image servers typically expect
+      
             proxyReq.setHeader('Accept', 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8');
             proxyReq.setHeader('Accept-Encoding', 'gzip, deflate, br');
             proxyReq.setHeader('Accept-Language', 'en-US,en;q=0.9');
@@ -66,7 +66,6 @@ export default defineConfig({
           proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('Image proxy response:', proxyRes.statusCode, proxyRes.statusMessage);
             
-            // Set appropriate headers for image response
             if (proxyRes.statusCode === 200) {
               res.setHeader('Cache-Control', 'public, max-age=3600');
               res.setHeader('Access-Control-Allow-Origin', '*');
@@ -78,7 +77,6 @@ export default defineConfig({
           proxy.on('error', (err, req, res) => {
             console.error('Image proxy error:', err.message);
             
-            // Send a proper error response
             if (!res.headersSent) {
               res.writeHead(404, {
                 'Content-Type': 'text/plain',
@@ -92,13 +90,12 @@ export default defineConfig({
     }
   },
   
-  // Optimize build for better performance
+  
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          utils: ['lodash'] // if you're using lodash
         }
       }
     }
